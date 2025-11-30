@@ -10,13 +10,17 @@ require (
 	github.com/gonutz/w32 v1.0.0
 	github.com/google/gopacket v1.1.17-0.20190408073642-1a2aa715ae41
 	github.com/gorilla/websocket v1.4.2
+	github.com/lxn/walk v0.0.0-20210112085537-c389da54e794
+	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/nats-io/go-nats v1.7.2
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/viper v1.7.1
-	golang.org/x/sys v0.5.0
+	golang.org/x/sys v0.9.0
+	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 	gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2
+	modernc.org/sqlite v1.27.0
 )
 
 require (

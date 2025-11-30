@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 
+	"github.com/ao-data/albiondata-client/db"
 	"github.com/ao-data/albiondata-client/lib"
 	"github.com/ao-data/albiondata-client/log"
 	uuid "github.com/nu7hatch/gouuid"
@@ -35,6 +36,17 @@ func (op operationAuctionGetRequestsResponse) Process(state *albionState) {
 
 	if len(orders) < 1 {
 		return
+	}
+
+	// Save to database if enabled
+	if db.DB != nil {
+		for _, order := range orders {
+			go func(o *lib.MarketOrder) {
+				if err := db.InsertMarketOrder(o); err != nil {
+					log.Debugf("Failed to save market order to database: %v", err)
+				}
+			}(order)
+		}
 	}
 
 	upload := lib.MarketUpload{

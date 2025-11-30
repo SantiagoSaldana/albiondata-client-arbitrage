@@ -38,11 +38,23 @@ type config struct {
 	PublicIngestBaseUrls           string
 	NoCPULimit                     bool
 	PrintVersion                   bool
+	DatabaseEnabled                bool
+	DatabasePath                   string
+	GUIEnabled                     bool
+	GUIAutoRefreshSeconds          int
+	GUIStartMinimized              bool
+	GUIRowsPerPage                 int
 }
 
 // config global config data
 var ConfigGlobal = &config{
-	LogLevel: "INFO",
+	LogLevel:              "INFO",
+	DatabaseEnabled:       false,
+	DatabasePath:          "./albion-market.db",
+	GUIEnabled:            false,
+	GUIAutoRefreshSeconds: 5,
+	GUIStartMinimized:     false,
+	GUIRowsPerPage:        100,
 }
 
 func (config *config) SetupFlags() {
@@ -84,6 +96,28 @@ func (config *config) setupWebsocketFlags() {
 
 	config.EnableWebsockets = viper.GetBool("EnableWebsockets")
 	config.AllowedWSHosts = viper.GetStringSlice("AllowedWebsocketHosts")
+
+	// Read database configuration
+	if viper.IsSet("database.enabled") {
+		config.DatabaseEnabled = viper.GetBool("database.enabled")
+	}
+	if viper.IsSet("database.path") {
+		config.DatabasePath = viper.GetString("database.path")
+	}
+
+	// Read GUI configuration
+	if viper.IsSet("gui.enabled") {
+		config.GUIEnabled = viper.GetBool("gui.enabled")
+	}
+	if viper.IsSet("gui.auto_refresh_seconds") {
+		config.GUIAutoRefreshSeconds = viper.GetInt("gui.auto_refresh_seconds")
+	}
+	if viper.IsSet("gui.start_minimized") {
+		config.GUIStartMinimized = viper.GetBool("gui.start_minimized")
+	}
+	if viper.IsSet("gui.rows_per_page") {
+		config.GUIRowsPerPage = viper.GetInt("gui.rows_per_page")
+	}
 }
 
 func (config *config) setupDebugFlags() {

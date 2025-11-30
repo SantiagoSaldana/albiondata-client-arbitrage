@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/ao-data/albiondata-client/client"
+	"github.com/ao-data/albiondata-client/db"
+	"github.com/ao-data/albiondata-client/gui"
 	"github.com/ao-data/albiondata-client/log"
 	"github.com/ao-data/albiondata-client/systray"
 
@@ -22,6 +24,41 @@ func main() {
 	if client.ConfigGlobal.PrintVersion {
 		log.Infof("Albion Data Client, version: %s", version)
 		return
+	}
+
+	// Initialize database if enabled
+	if client.ConfigGlobal.DatabaseEnabled {
+		err := db.InitDB(client.ConfigGlobal.DatabasePath)
+		if err != nil {
+			log.Errorf("Failed to initialize database: %v", err)
+			log.Error("Continuing without database support...")
+		} else {
+			defer db.Close()
+			log.Infof("Database initialized at: %s", client.ConfigGlobal.DatabasePath)
+		}
+	}
+
+	// Start GUI if enabled
+	if client.ConfigGlobal.GUIEnabled {
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Errorf("GUI failed to initialize (may need to run from Windows desktop): %v", r)
+					log.Info("Continuing without GUI. Database is still active.")
+				}
+			}()
+
+			marketGUI := gui.NewGUI(client.ConfigGlobal.GUIRowsPerPage)
+			if client.ConfigGlobal.GUIAutoRefreshSeconds > 0 {
+				marketGUI.StartAutoRefresh(time.Duration(client.ConfigGlobal.GUIAutoRefreshSeconds) * time.Second)
+			}
+
+			// Run GUI (blocks until window closed)
+			err := marketGUI.Run()
+			if err != nil {
+				log.Errorf("GUI error: %v", err)
+			}
+		}()
 	}
 
 	startUpdater()

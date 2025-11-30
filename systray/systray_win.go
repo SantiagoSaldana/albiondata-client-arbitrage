@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/ao-data/albiondata-client/client"
+	"github.com/ao-data/albiondata-client/gui"
 
 	"github.com/ao-data/albiondata-client/icon"
 	"github.com/getlantern/systray"
@@ -65,6 +66,14 @@ func onReady() {
 	systray.SetIcon(icon.Data)
 	systray.SetTitle("Albion Data Client")
 	systray.SetTooltip("Albion Data Client")
+
+	// Add GUI menu item if enabled
+	var mShowGUI *systray.MenuItem
+	if client.ConfigGlobal.GUIEnabled {
+		mShowGUI = systray.AddMenuItem("Show Market Orders", "Open the market orders window")
+		systray.AddSeparator()
+	}
+
 	mConHideShow := systray.AddMenuItem(GetActionTitle(), "Show/Hide Console")
 	mQuit := systray.AddMenuItem("Quit", "Close the Albion Data Client")
 
@@ -84,6 +93,19 @@ func onReady() {
 				} else {
 					hideConsole()
 					mConHideShow.SetTitle(GetActionTitle())
+				}
+
+			case <-func() chan struct{} {
+				if mShowGUI != nil {
+					return mShowGUI.ClickedCh
+				}
+				// Return a channel that never sends if GUI is disabled
+				ch := make(chan struct{})
+				return ch
+			}():
+				// Show the GUI window
+				if g := gui.GetGlobalGUI(); g != nil {
+					g.Show()
 				}
 			}
 		}
